@@ -84,8 +84,12 @@ export default function Piano() {
     const socketRef = useRef<Socket | null>(null);
 
     useEffect(() => {
+        let isMounted = true;
+
         const initSocket = async () => {
             await fetch("/api/socket");
+
+            if (!isMounted) return;
 
             const socketInstance = io({
                 path: "/api/socket-io",
@@ -111,6 +115,7 @@ export default function Piano() {
         synth.current = new Tone.PolySynth(Tone.Synth).toDestination();
 
         return () => {
+            isMounted = false;
             if (socketRef.current) {
                 socketRef.current.disconnect();
             }
