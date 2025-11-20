@@ -94,6 +94,7 @@ export default function Piano() {
 
             socketInstance.on("connect", () => {
                 console.log("Connected to socket");
+                socketInstance.emit("join-piano");
             });
 
             socketInstance.on("play-note", (data: { note: string }) => {
