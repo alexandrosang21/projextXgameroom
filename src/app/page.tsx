@@ -1,41 +1,81 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Swords } from "lucide-react";
-import Arena from "@/components/Arena";
+import { Swords, Music, Gamepad2 } from "lucide-react";
+import Link from "next/link";
 
-export default function Home() {
-  return (
-      <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-900 via-[#0f172a] to-black text-white overflow-hidden relative">
-          {/* Background decorative elements */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-red-500/10 blur-[100px]" />
-              <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-blue-500/10 blur-[100px]" />
-          </div>
+export default function Dashboard() {
+    return (
+        <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-900 via-[#0f172a] to-black text-white overflow-hidden relative">
+            {/* Background decorative elements */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-purple-500/10 blur-[100px]" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-blue-500/10 blur-[100px]" />
+            </div>
 
-          <div className="z-10 w-full h-screen flex flex-col items-center">
-              <motion.div
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="absolute top-8 flex flex-col items-center text-center z-20"
-              >
-                  <div className="flex items-center gap-4 mb-2">
-                      <Swords className="w-8 h-8 text-red-500" />
-                      <h1 className="text-3xl font-black tracking-tight bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent italic">
-                          CYBER DUEL
-                      </h1>
-                      <Swords className="w-8 h-8 text-red-500 scale-x-[-1]" />
-                  </div>
-              </motion.div>
+            <div className="z-10 w-full max-w-4xl flex flex-col items-center">
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-center mb-16"
+                >
+                    <div className="flex items-center justify-center gap-4 mb-4">
+                        <Gamepad2 className="w-12 h-12 text-white" />
+                    </div>
+                    <h1 className="text-5xl font-black tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent mb-4">
+                        GAME HUB
+                    </h1>
+                    <p className="text-slate-400 text-lg">
+                        Choose your arena and challenge the world
+                    </p>
+                </motion.div>
 
-              <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="w-full h-full"
-              >
-                  <Arena />
-              </motion.div>
-          </div>
-      </main>
-  );
+                <div className="grid md:grid-cols-2 gap-8 w-full px-4">
+                    {/* Cyber Duel Card */}
+                    <Link href="/fight" className="group">
+                        <motion.div
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="relative h-80 rounded-3xl bg-gradient-to-br from-red-900/50 to-orange-900/50 border border-red-500/20 p-8 flex flex-col items-center justify-center text-center cursor-pointer overflow-hidden group-hover:border-red-500/50 transition-colors"
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                            <div className="relative z-10 bg-red-500/20 p-6 rounded-full mb-6 group-hover:scale-110 transition-transform duration-300">
+                                <Swords className="w-12 h-12 text-red-400" />
+                            </div>
+
+                            <h2 className="relative z-10 text-3xl font-black italic text-white mb-2 group-hover:text-red-400 transition-colors">
+                                CYBER DUEL
+                            </h2>
+                            <p className="relative z-10 text-red-200/60 font-medium">
+                                1v1 Real-time Combat
+                            </p>
+                        </motion.div>
+                    </Link>
+
+                    {/* Piano Multiplayer Card */}
+                    <Link href="/piano" className="group">
+                        <motion.div
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="relative h-80 rounded-3xl bg-gradient-to-br from-purple-900/50 to-pink-900/50 border border-purple-500/20 p-8 flex flex-col items-center justify-center text-center cursor-pointer overflow-hidden group-hover:border-purple-500/50 transition-colors"
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                            <div className="relative z-10 bg-purple-500/20 p-6 rounded-full mb-6 group-hover:scale-110 transition-transform duration-300">
+                                <Music className="w-12 h-12 text-purple-400" />
+                            </div>
+
+                            <h2 className="relative z-10 text-3xl font-black italic text-white mb-2 group-hover:text-purple-400 transition-colors">
+                                PIANO MULTIPLAYER
+                            </h2>
+                            <p className="relative z-10 text-purple-200/60 font-medium">
+                                Jam with friends
+                            </p>
+                        </motion.div>
+                    </Link>
+                </div>
+            </div>
+        </main>
+    );
 }

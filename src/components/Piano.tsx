@@ -88,7 +88,8 @@ export default function Piano() {
             await fetch("/api/socket");
 
             const socketInstance = io({
-                path: "/api/socket",
+                path: "/api/socket-io",
+                addTrailingSlash: false,
             });
 
             socketInstance.on("connect", () => {

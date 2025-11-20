@@ -35,75 +35,112 @@ export default function Arena() {
 
   // ... (Sound Effects function remains same) ...
   const playSound = (type: "ATTACK" | "BLOCK" | "HIT" | "KO") => {
-    if (Tone.context.state !== "running") Tone.start();
-    if (!synthRef.current) return;
+      if (Tone.context.state !== "running") Tone.start();
+      if (!synthRef.current) return;
 
-    switch (type) {
-      case "ATTACK":
-        synthRef.current.triggerAttackRelease(["C2", "E2"], "16n");
-        break;
-      case "BLOCK":
-        synthRef.current.triggerAttackRelease(["G1"], "8n");
-        break;
-      case "HIT":
-        synthRef.current.triggerAttackRelease(["A1", "C2"], "8n");
-        break;
-      case "KO":
-        synthRef.current.triggerAttackRelease(["C1", "G1", "C2", "G2"], "1n");
-        break;
-    }
+      switch (type) {
+          case "ATTACK":
+              synthRef.current.triggerAttackRelease(["C2", "E2"], "16n");
+              break;
+          case "BLOCK":
+              synthRef.current.triggerAttackRelease(["G1"], "8n");
+              break;
+          case "HIT":
+              synthRef.current.triggerAttackRelease(["A1", "C2"], "8n");
+              break;
+          case "KO":
+              synthRef.current.triggerAttackRelease(
+                  ["C1", "G1", "C2", "G2"],
+                  "1n"
+              );
+              break;
+      }
   };
 
+  const [isConnecting, setIsConnecting] = useState(false);
+
   const joinGame = async () => {
-    if (!playerName.trim()) return;
-    
-    await fetch("/api/socket");
-    const socketInstance = io({ path: "/api/socket" });
+      if (!playerName.trim() || isConnecting || socketRef.current) return;
+      setIsConnecting(true);
 
-    socketInstance.on("connect", () => {
-      console.log("Connected to arena");
-      socketInstance.emit("join-game", { name: playerName });
-    });
+      try {
+          await fetch("/api/socket");
 
-    socketInstance.on("init-game", (data) => {
-      setMyRole(data.role);
-      setPlayers(data.players);
-      setIsJoined(true);
-      if (Object.keys(data.players).length >= 2) setGameStatus("FIGHTING");
-    });
+          if (socketRef.current) return;
 
-    socketInstance.on("player-joined", (data) => {
-      setPlayers((prev) => {
-        const next = { ...prev, [data.id]: data.player };
-        if (Object.keys(next).length >= 2) setGameStatus("FIGHTING");
-        return next;
-      });
-    });
+          const socketInstance = io({
+              path: "/api/socket-io",
+              addTrailingSlash: false,
+              reconnectionAttempts: 5,
+              reconnectionDelay: 1000,
+          });
 
-    socketInstance.on("player-left", (data) => {
-      setPlayers((prev) => {
-        const next = { ...prev };
-        delete next[data.id];
-        return next;
-      });
-      setGameStatus("WAITING");
-    });
+          socketInstance.on("connect", () => {
+              console.log("Connected to arena");
+              socketInstance.emit("join-fight", { name: playerName });
+              setIsConnecting(false);
+          });
 
-    socketInstance.on("player-action", (data) => {
-      handleRemoteAction(data);
-    });
+          socketInstance.on("init-game", (data) => {
+              setMyRole(data.role);
+              setPlayers(data.players);
+              setIsJoined(true);
+              if (Object.keys(data.players).length >= 2)
+                  setGameStatus("FIGHTING");
+          });
 
-    socketInstance.on("state-sync", (data) => {
-      setPlayers((prev) => ({
-        ...prev,
-        [data.id]: { ...prev[data.id], ...data.state },
-      }));
-    });
+          socketInstance.on("player-joined", (data) => {
+              setPlayers((prev) => {
+                  const next = { ...prev, [data.id]: data.player };
+                  if (Object.keys(next).length >= 2) setGameStatus("FIGHTING");
+                  return next;
+              });
+          });
 
-    socketRef.current = socketInstance;
-    setSocket(socketInstance);
-    
-    synthRef.current = new Tone.PolySynth(Tone.Synth).toDestination();
+          socketInstance.on("player-left", (data) => {
+              console.log("Player left:", data.id);
+              setPlayers((prev) => {
+                  const next = { ...prev };
+                  delete next[data.id];
+                  return next;
+              });
+              setGameStatus("WAITING");
+          });
+
+          socketInstance.on("player-action", (data) => {
+              handleRemoteAction(data);
+          });
+
+          socketInstance.on("state-sync", (data) => {
+              setPlayers((prev) => ({
+                  ...prev,
+                  [data.id]: { ...prev[data.id], ...data.state },
+              }));
+          });
+
+          socketInstance.on("game-over", (data) => {
+              setGameStatus("GAME_OVER");
+              setWinner(data.winner);
+              playSound("KO");
+          });
+
+          socketInstance.on("disconnect", (reason) => {
+              console.log("Socket disconnected:", reason);
+              setIsConnecting(false);
+          });
+
+          socketInstance.on("connect_error", (error) => {
+              console.error("Socket connection error:", error);
+              setIsConnecting(false);
+          });
+
+          socketRef.current = socketInstance;
+          setSocket(socketInstance);
+          synthRef.current = new Tone.PolySynth(Tone.Synth).toDestination();
+      } catch (error) {
+          console.error("Failed to join game:", error);
+          setIsConnecting(false);
+      }
   };
 
   useEffect(() => {
