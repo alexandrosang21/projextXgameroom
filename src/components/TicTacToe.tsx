@@ -5,6 +5,7 @@ import { io, Socket } from "socket.io-client";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 import * as Tone from "tone";
 
@@ -19,6 +20,7 @@ interface TicTacToeState {
 }
 
 export default function TicTacToe() {
+    const searchParams = useSearchParams();
     const [socket, setSocket] = useState<Socket | null>(null);
     const [gameState, setGameState] = useState<TicTacToeState>({
         board: Array(9).fill(null),
@@ -28,8 +30,15 @@ export default function TicTacToe() {
     });
     const [myRole, setMyRole] = useState<"X" | "O" | "SPECTATOR">("SPECTATOR");
     const [score, setScore] = useState({ X: 0, O: 0 });
+    const [showDebug, setShowDebug] = useState(false);
     const socketRef = useRef<Socket | null>(null);
     const lastWinnerRef = useRef<string | null>(null);
+
+    useEffect(() => {
+        if (searchParams?.get("debug") !== null) {
+            setShowDebug(true);
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         let isMounted = true;
@@ -208,12 +217,14 @@ export default function TicTacToe() {
                 </motion.button>
             )}
 
-            <button
-                onClick={() => socket?.emit("tictactoe-restart")}
-                className="mt-4 text-xs text-red-500/50 hover:text-red-500 underline"
-            >
-                Force Hard Reset (Debug)
-            </button>
+            {showDebug && (
+                <button
+                    onClick={() => socket?.emit("tictactoe-restart")}
+                    className="mt-4 text-xs text-red-500/50 hover:text-red-500 underline"
+                >
+                    Force Hard Reset (Debug)
+                </button>
+            )}
 
             <div className="mt-8 text-slate-500 text-sm">
                 Players: {gameState.players.X ? "X (Connected)" : "X (Waiting)"}{" "}
