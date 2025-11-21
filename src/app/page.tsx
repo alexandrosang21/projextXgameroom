@@ -30,7 +30,7 @@ export default function Dashboard() {
                     </p>
                 </motion.div>
 
-                <div className="grid md:grid-cols-2 gap-8 w-full px-4">
+                <div className="grid md:grid-cols-3 gap-8 w-full px-4">
                     {/* Cyber Duel Card */}
                     <Link href="/fight" className="group">
                         <motion.div
@@ -74,7 +74,56 @@ export default function Dashboard() {
                             </p>
                         </motion.div>
                     </Link>
+
+                    {/* Tic Tac Toe Card */}
+                    <Link href="/tictactoe" className="group">
+                        <motion.div
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="relative h-80 rounded-3xl bg-gradient-to-br from-blue-900/50 to-cyan-900/50 border border-blue-500/20 p-8 flex flex-col items-center justify-center text-center cursor-pointer overflow-hidden group-hover:border-blue-500/50 transition-colors"
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                            <div className="relative z-10 bg-blue-500/20 p-6 rounded-full mb-6 group-hover:scale-110 transition-transform duration-300">
+                                <Gamepad2 className="w-12 h-12 text-blue-400" />
+                            </div>
+
+                            <h2 className="relative z-10 text-3xl font-black italic text-white mb-2 group-hover:text-blue-400 transition-colors">
+                                TIC TAC TOE
+                            </h2>
+                            <p className="relative z-10 text-blue-200/60 font-medium">
+                                Classic Strategy
+                            </p>
+                        </motion.div>
+                    </Link>
                 </div>
+            </div>
+
+            {/* Debug: Disconnect All */}
+            <div className="absolute bottom-4 right-4 z-50">
+                <button
+                    onClick={async () => {
+                        await fetch("/api/socket");
+                        // We need a socket to emit, but we might not be connected on the home page if we just landed here.
+                        // However, usually we connect on game pages.
+                        // Let's just make a temp connection or assume if we are here we might not be connected.
+                        // Actually, the cleanest way is to have a global socket or just a simple fetch endpoint that triggers it?
+                        // But we are using socket events.
+                        // Let's just instantiate a temp socket to send the command.
+                        const { io } = await import("socket.io-client");
+                        const socket = io({
+                            path: "/api/socket-io",
+                            addTrailingSlash: false,
+                        });
+                        socket.on("connect", () => {
+                            socket.emit("disconnect-all");
+                            setTimeout(() => socket.disconnect(), 100);
+                        });
+                    }}
+                    className="px-4 py-2 bg-red-900/50 text-red-400 text-xs rounded hover:bg-red-900 transition-colors"
+                >
+                    DEBUG: Disconnect All
+                </button>
             </div>
         </main>
     );

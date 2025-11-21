@@ -4,6 +4,8 @@ import { useEffect, useState, useRef } from "react";
 import * as Tone from "tone";
 import { io, Socket } from "socket.io-client";
 import { motion } from "framer-motion";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 const NOTES = [
     { note: "C4", color: "bg-red-500", label: "C", key: "a" },
@@ -184,7 +186,15 @@ export default function Piano() {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center w-full h-full p-4">
+        <div className="flex flex-col items-center justify-center w-full h-full p-4 relative">
+            {/* Back to Hub */}
+            <Link
+                href="/"
+                className="absolute top-4 left-4 z-50 flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
+            >
+                <ArrowLeft className="w-6 h-6" />
+                <span className="font-bold">HUB</span>
+            </Link>
             {/* Song Selection */}
             <div className="flex gap-4 mb-8 overflow-x-auto w-full max-w-4xl justify-center pb-2">
                 {SONGS.map((song, idx) => (
