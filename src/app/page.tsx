@@ -1,22 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
+import { Suspense } from "react";
 import { motion } from "framer-motion";
 import { Swords, Music, Gamepad2 } from "lucide-react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import DebugButton from "@/components/DebugButton";
 
 export default function Dashboard() {
-    const searchParams = useSearchParams();
-    const [showDebug, setShowDebug] = useState(false);
-
-    useEffect(() => {
-        if (searchParams?.get("debug") !== null) {
-            setShowDebug(true);
-        }
-    }, [searchParams]);
-
     return (
         <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-900 via-[#0f172a] to-black text-white overflow-hidden relative">
             {/* Background decorative elements */}
@@ -112,33 +102,9 @@ export default function Dashboard() {
             </div>
 
             {/* Debug: Disconnect All */}
-            {showDebug && (
-                <div className="absolute bottom-4 right-4 z-50">
-                    <button
-                        onClick={async () => {
-                            await fetch("/api/socket");
-                            // We need a socket to emit, but we might not be connected on the home page if we just landed here.
-                            // However, usually we connect on game pages.
-                            // Let's just make a temp connection or assume if we are here we might not be connected.
-                            // Actually, the cleanest way is to have a global socket or just a simple fetch endpoint that triggers it?
-                            // But we are using socket events.
-                            // Let's just instantiate a temp socket to send the command.
-                            const { io } = await import("socket.io-client");
-                            const socket = io({
-                                path: "/api/socket-io",
-                                addTrailingSlash: false,
-                            });
-                            socket.on("connect", () => {
-                                socket.emit("disconnect-all");
-                                setTimeout(() => socket.disconnect(), 100);
-                            });
-                        }}
-                        className="px-4 py-2 bg-red-900/50 text-red-400 text-xs rounded hover:bg-red-900 transition-colors"
-                    >
-                        DEBUG: Disconnect All
-                    </button>
-                </div>
-            )}
+            <Suspense fallback={null}>
+                <DebugButton />
+            </Suspense>
         </main>
     );
 }
